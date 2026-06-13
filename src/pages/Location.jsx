@@ -1,3 +1,5 @@
+import { proxyUrl } from '../components/scenes.js';
+import { scenes } from '../components/scenes.js';
 import { PageHero, Sec, Head, Btn } from '../components/UI.jsx';
 import { parks } from '../data/index.js';
 
@@ -36,9 +38,9 @@ export default function Location() {
           <div>
             {/* Scenic overview photo */}
             <div style={{ borderRadius:4, overflow:'hidden', marginBottom:'1rem', aspectRatio:'16/9' }}>
-              <img src="https://www.tourismgolden.com/sites/default/files/Golden-BC-scenic-Kicking-Horse-Eagles-Eye-sunset%20credit%20Best.jpg"
+              <img src={proxyUrl("https://www.tourismgolden.com/sites/default/files/Golden-BC-scenic-Kicking-Horse-Eagles-Eye-sunset%20credit%20Best.jpg")}
                 alt="Golden BC scenic view" style={{ width:'100%', height:'100%', objectFit:'cover' }}
-                onError={e=>e.target.parentNode.style.background='#1A2B1A'} loading="lazy"/>
+                onError={e=>{ if(scenes.mountains) e.target.src=scenes.mountains; }} loading="lazy"/>
             </div>
             <p style={{ fontSize:'0.75rem', color:'#6B6456', textAlign:'center', lineHeight:1.55 }}>
               View from Eagle's Eye Restaurant — Kicking Horse Mountain Resort · Photo: Tourism Golden

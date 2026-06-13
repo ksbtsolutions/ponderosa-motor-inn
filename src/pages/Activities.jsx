@@ -1,3 +1,4 @@
+import { proxyUrl } from '../components/scenes.js';
 import { Link } from 'react-router-dom';
 import { PageHero, Sec, Head, Btn } from '../components/UI.jsx';
 import Gallery from '../components/Gallery.jsx';
@@ -15,7 +16,7 @@ export default function Activities() {
             <div key={i} style={{ background:'#fff', borderRadius:4, border:'1px solid #e5dfd5', borderLeft:'3px solid #C4872A', overflow:'hidden' }}>
               {a.img && (
                 <div style={{ height:160, overflow:'hidden', position:'relative' }}>
-                  <img src={a.img} alt={a.name} style={{ width:'100%', height:'100%', objectFit:'cover' }} onError={e=>e.target.style.display='none'} loading="lazy"/>
+                  <img src={proxyUrl(a.img)} alt={a.name} style={{ width:'100%', height:'100%', objectFit:'cover' }} onError={e=>{ if(a.fallback && e.target.src!==a.fallback) e.target.src=a.fallback; }} loading="lazy"/>
                   <div style={{ position:'absolute', top:'0.6rem', right:'0.6rem', background:'rgba(0,0,0,0.55)', color:'#E5A83E', fontSize:'0.6rem', fontWeight:600, textTransform:'uppercase', letterSpacing:'0.1em', padding:'0.2rem 0.5rem', borderRadius:2 }}>{a.season}</div>
                 </div>
               )}
@@ -65,7 +66,7 @@ export default function Activities() {
             </div>
           </div>
           <div style={{ borderRadius:4, overflow:'hidden', aspectRatio:'4/3' }}>
-            <img src="https://www.tourismgolden.com/sites/default/files/styles/hero_image/public/2022-11/Kicking-Horse-Mountain-Resort-ski-Golden-BC-winter.jpg"
+            <img src={proxyUrl("https://www.tourismgolden.com/sites/default/files/styles/hero_image/public/2022-11/Kicking-Horse-Mountain-Resort-ski-Golden-BC-winter.jpg")}
               alt="Kicking Horse Mountain Resort" style={{ width:'100%', height:'100%', objectFit:'cover' }}
               onError={e=>e.target.parentNode.style.background='#1A2B1A'} loading="lazy"/>
           </div>
@@ -76,7 +77,7 @@ export default function Activities() {
       <Sec bg="#fff">
         <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))', gap:'3rem', alignItems:'center' }}>
           <div style={{ borderRadius:4, overflow:'hidden', aspectRatio:'4/3' }}>
-            <img src="https://www.tourismgolden.com/sites/default/files/styles/hero_image/public/2024-02/Golden-Skybridge-suspension-bridge-canyon-BC.jpg"
+            <img src={proxyUrl("https://www.tourismgolden.com/sites/default/files/styles/hero_image/public/2024-02/Golden-Skybridge-suspension-bridge-canyon-BC.jpg")}
               alt="Golden Skybridge" style={{ width:'100%', height:'100%', objectFit:'cover' }}
               onError={e=>e.target.parentNode.style.background='#1A2B1A'} loading="lazy"/>
           </div>

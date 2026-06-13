@@ -3,28 +3,148 @@ import { MtnDivider, Sec, Head, Btn } from '../components/UI.jsx';
 import PhotoSlider from '../components/PhotoSlider.jsx';
 import ReviewSlider from '../components/ReviewSlider.jsx';
 import { propertyPhotos, rooms, parks, activities, reviews, travelLinks } from '../data/index.js';
+import { scenes } from '../components/scenes.js';
+
+// ─── HERO PHOTO ───────────────────────────────────────────────────────────────
+// Canadian Rockies mountain valley — Chris Czermak on Unsplash (free commercial use)
+// https://unsplash.com/photos/green-trees-near-lake-and-mountains-78fc843a36f8
+const HERO_PHOTO = {
+  // Optimised for each breakpoint — Unsplash's CDN resizes on the fly
+  src:    'https://images.unsplash.com/photo-1587381419916-78fc843a36f8?auto=format&fit=crop&w=1920&q=80',
+  srcSet: [
+    'https://images.unsplash.com/photo-1587381419916-78fc843a36f8?auto=format&fit=crop&w=640&q=75   640w',
+    'https://images.unsplash.com/photo-1587381419916-78fc843a36f8?auto=format&fit=crop&w=1080&q=80  1080w',
+    'https://images.unsplash.com/photo-1587381419916-78fc843a36f8?auto=format&fit=crop&w=1920&q=80  1920w',
+    'https://images.unsplash.com/photo-1587381419916-78fc843a36f8?auto=format&fit=crop&w=2560&q=80  2560w',
+  ].join(', '),
+  // WebP variant (Unsplash serves WebP automatically when the browser supports it via auto=format)
+  alt: 'Canadian Rockies mountain valley near Golden, BC — green forest, lake, and snow-capped peaks',
+  credit: { name: 'Chris Czermak', url: 'https://unsplash.com/photos/green-trees-near-lake-and-mountains-under-blue-sky-during-daytime-78fc843a36f8' },
+};
 
 export default function Home() {
   return (
     <div>
-      {/* HERO */}
-      <div style={{ minHeight:'100svh', background:'#1A2B1A', display:'flex', flexDirection:'column', justifyContent:'center', alignItems:'center', textAlign:'center', padding:'6rem 1.5rem 0', position:'relative', overflow:'hidden' }}>
-        <div style={{ position:'absolute', inset:0, background:'radial-gradient(ellipse at 60% 35%,rgba(196,135,42,0.09) 0%,transparent 65%)', pointerEvents:'none' }}/>
-        <p style={{ fontSize:'0.7rem', letterSpacing:'0.2em', textTransform:'uppercase', color:'#E5A83E', fontWeight:500, marginBottom:'1.2rem' }}>Gateway to Six National Parks</p>
-        <h1 style={{ fontFamily:"'Playfair Display',serif", fontSize:'clamp(2.2rem,7vw,5rem)', color:'#fff', lineHeight:1.1, maxWidth:820, marginBottom:'1.2rem' }}>
-          Where the Rockies Meet <em style={{ color:'#E5A83E' }}>Golden</em> Hospitality
-        </h1>
-        <p style={{ color:'#a8b89a', fontSize:'clamp(0.9rem,2vw,1.05rem)', fontWeight:300, maxWidth:480, marginBottom:'2.25rem', lineHeight:1.75 }}>
-          85 clean, spacious rooms nestled between the Rocky and Selkirk mountain ranges in scenic Golden, BC.
-        </p>
-        <div className="hero-actions" style={{ display:'flex', gap:'1rem', flexWrap:'wrap', justifyContent:'center', marginBottom:'1.75rem' }}>
-          <Btn href="/contact">Reserve a Room</Btn>
-          <Btn variant="ghost" href="/accommodations">View Rooms</Btn>
+      {/* ── HERO ── */}
+      <div style={{
+        minHeight: '100svh',
+        position: 'relative',
+        overflow: 'hidden',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        textAlign: 'center',
+        padding: '6rem 1.5rem 0',
+        // SVG scene as CSS background — renders instantly while photo loads
+        background: `#1A2B1A url("${scenes.mountains}") center/cover no-repeat`,
+      }}>
+
+        {/* Full-bleed hero photo — fetchpriority=high for LCP */}
+        <img
+          src={HERO_PHOTO.src}
+          srcSet={HERO_PHOTO.srcSet}
+          sizes="100vw"
+          alt={HERO_PHOTO.alt}
+          fetchpriority="high"
+          decoding="async"
+          style={{
+            position: 'absolute', inset: 0,
+            width: '100%', height: '100%',
+            objectFit: 'cover', objectPosition: 'center 40%',
+            zIndex: 0,
+          }}
+          // If photo fails, the CSS background SVG scene stays visible
+          onError={e => { e.target.style.display = 'none'; }}
+        />
+
+        {/* Dark overlay — enough contrast for white text on any photo */}
+        <div style={{
+          position: 'absolute', inset: 0, zIndex: 1,
+          background: 'linear-gradient(180deg, rgba(10,20,10,0.55) 0%, rgba(10,20,10,0.45) 50%, rgba(10,20,10,0.75) 100%)',
+        }}/>
+
+        {/* Amber glow accent */}
+        <div style={{
+          position: 'absolute', inset: 0, zIndex: 1,
+          background: 'radial-gradient(ellipse at 65% 30%, rgba(196,135,42,0.12) 0%, transparent 60%)',
+          pointerEvents: 'none',
+        }}/>
+
+        {/* Content — sits above overlays */}
+        <div style={{ position: 'relative', zIndex: 2, width: '100%' }}>
+          <p style={{ fontSize: '0.7rem', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#E5A83E', fontWeight: 600, marginBottom: '1.2rem', textShadow: '0 1px 4px rgba(0,0,0,0.5)' }}>
+            Gateway to Six National Parks
+          </p>
+          <h1 style={{
+            fontFamily: "'Playfair Display', serif",
+            fontSize: 'clamp(2.2rem,7vw,5.2rem)',
+            color: '#fff', lineHeight: 1.08,
+            maxWidth: 860, margin: '0 auto 1.25rem',
+            textShadow: '0 2px 16px rgba(0,0,0,0.45)',
+          }}>
+            Where the Rockies Meet <em style={{ color: '#E5A83E', fontStyle: 'italic' }}>Golden</em> Hospitality
+          </h1>
+          <p style={{
+            color: 'rgba(220,235,210,0.9)',
+            fontSize: 'clamp(0.9rem,2vw,1.1rem)',
+            fontWeight: 300, maxWidth: 500, margin: '0 auto 2.25rem',
+            lineHeight: 1.75, textShadow: '0 1px 6px rgba(0,0,0,0.4)',
+          }}>
+            85 clean, spacious rooms nestled between the Rocky and Selkirk mountain ranges in scenic Golden, BC.
+          </p>
+          <div className="hero-actions" style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center', marginBottom: '1.75rem' }}>
+            <Btn href="/contact">Reserve a Room</Btn>
+            <Btn variant="ghost" href="/accommodations">View Rooms</Btn>
+          </div>
+          <p style={{ color: 'rgba(180,200,160,0.8)', fontSize: '0.8rem', letterSpacing: '0.06em', marginBottom: '2.5rem', textShadow: '0 1px 4px rgba(0,0,0,0.4)' }}>
+            Reservations:{' '}
+            <a href="tel:18008814233" style={{ color: '#E5A83E', textDecoration: 'none', fontWeight: 700, fontSize: '0.95rem' }}>
+              1-800-881-4233
+            </a>
+          </p>
         </div>
-        <p style={{ color:'#5a6a4a', fontSize:'0.8rem', letterSpacing:'0.06em', marginBottom:'2.5rem' }}>
-          Reservations: <a href="tel:18008814233" style={{ color:'#E5A83E', textDecoration:'none', fontWeight:600, fontSize:'0.95rem' }}>1-800-881-4233</a>
-        </p>
-        <MtnDivider from="#1A2B1A" to="#fff"/>
+
+        {/* Scroll cue */}
+        <div style={{
+          position: 'absolute', bottom: '5.5rem', left: '50%', transform: 'translateX(-50%)',
+          zIndex: 2, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.4rem',
+          animation: 'bounce 2s ease-in-out infinite',
+        }}>
+          <span style={{ fontSize: '0.6rem', letterSpacing: '0.15em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)' }}>Scroll</span>
+          <svg width="16" height="24" viewBox="0 0 16 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="6" y="0" width="4" height="12" rx="2" fill="rgba(255,255,255,0.3)"/>
+            <rect x="6" y="3" width="4" height="5" rx="2" fill="rgba(229,168,62,0.7)">
+              <animate attributeName="y" values="3;7;3" dur="1.6s" repeatCount="indefinite"/>
+            </rect>
+          </svg>
+        </div>
+
+        {/* Photo credit */}
+        <a
+          href={HERO_PHOTO.credit.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            position: 'absolute', bottom: '5rem', right: '0.75rem', zIndex: 2,
+            color: 'rgba(255,255,255,0.35)', fontSize: '0.6rem',
+            textDecoration: 'none', letterSpacing: '0.05em',
+            transition: 'color 0.2s',
+          }}
+          onMouseEnter={e => e.currentTarget.style.color = 'rgba(255,255,255,0.7)'}
+          onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.35)'}
+        >
+          Photo: {HERO_PHOTO.credit.name} / Unsplash
+        </a>
+
+        <style>{`
+          @keyframes bounce {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(6px); }
+          }
+        `}</style>
+
+        <MtnDivider from="transparent" to="#fff" />
       </div>
 
       {/* STATS */}

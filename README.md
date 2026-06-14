@@ -1,113 +1,114 @@
-# Ponderosa Motor Inn — Website
+# Ponderosa Motor Inn — Website v2.0
 
-React + Vite multi-page website with Vercel serverless API functions.
+A production-ready React/Vite website for the Ponderosa Motor Inn, Golden BC. Deployable to Vercel in minutes.
 
-## 🚀 Deploy to Vercel
+## Stack
 
-### Option A: GitHub (recommended)
-1. Push this folder to a GitHub repo
-2. Go to [vercel.com](https://vercel.com) → New Project → Import repo
-3. Framework: **Vite** (auto-detected) · Build: `npm run build` · Output: `dist`
-4. Add environment variables (see below)
-5. Deploy
+- **Framework**: React 18 + Vite 5
+- **Routing**: React Router v6
+- **Deployment**: Vercel (edge + serverless functions)
+- **Email**: Resend API
+- **Design**: Playfair Display + Inter, forest green / parchment / amber palette
 
-### Option B: Vercel CLI
-```bash
-npm install
-npx vercel --prod
+## Project Structure
+
+```
+ponderosa/
+├── src/
+│   ├── components/       # Reusable UI components
+│   │   ├── Nav.jsx       # Fixed nav with mobile drawer
+│   │   ├── Footer.jsx
+│   │   ├── HeroMedia.jsx # Video/image/SVG fallback hero
+│   │   ├── BookingWidget.jsx  # Date picker + OTA deep-links
+│   │   ├── ReviewSlider.jsx
+│   │   ├── MountainDivider.jsx
+│   │   └── AnimateIn.jsx
+│   ├── pages/            # Six pages
+│   │   ├── Home.jsx
+│   │   ├── Accommodations.jsx
+│   │   ├── Activities.jsx
+│   │   ├── Location.jsx
+│   │   ├── Packages.jsx
+│   │   └── Contact.jsx
+│   ├── hooks/
+│   │   └── useAnimateIn.js
+│   ├── styles/
+│   │   └── global.css    # Design tokens + utilities
+│   ├── App.jsx
+│   └── main.jsx
+├── api/
+│   ├── enquiry.js        # POST → dual email via Resend
+│   ├── availability.js   # GET → OTA deep-links
+│   └── img.js            # Image proxy with domain allowlist
+├── public/
+│   ├── robots.txt
+│   └── sitemap.xml
+├── index.html            # SEO meta, structured data, font preloads
+├── vite.config.js
+└── vercel.json           # Security headers + rewrites
 ```
 
-## ⚙️ Environment Variables
-Set these in **Vercel Dashboard → Project → Settings → Environment Variables**:
+## Deploy to Vercel
+
+### 1. Install dependencies
+```bash
+npm install
+```
+
+### 2. Test locally
+```bash
+npm run dev
+```
+
+### 3. Set environment variables in Vercel dashboard
+```
+RESEND_API_KEY=re_xxxxxxxxxxxxxxxxxxxxxxxxxxxx
+```
+
+### 4. Deploy
+```bash
+npm install -g vercel
+vercel --prod
+```
+
+Or connect your GitHub repo to Vercel for automatic deploys on push.
+
+## Environment Variables
 
 | Variable | Required | Description |
 |---|---|---|
-| `RESEND_API_KEY` | Yes | From [resend.com](https://resend.com) — free tier 3k emails/month |
-| `INN_EMAIL` | Yes | Where reservation emails go, e.g. `reservations@ponderosamotorinn.bc.ca` |
-| `FROM_EMAIL` | Yes | Verified sender, e.g. `noreply@ponderosamotorinn.bc.ca` |
+| `RESEND_API_KEY` | Yes | From resend.com — for contact form emails |
 
-### Resend setup (5 min)
-1. Sign up at [resend.com](https://resend.com)
-2. Add & verify your domain (`ponderosamotorinn.bc.ca`) → adds 3 DNS records
-3. Create an API key → paste into `RESEND_API_KEY` in Vercel
-4. Done — both guest confirmation + inn notification emails work automatically
+## SEO Features
 
-**Without env vars:** The API returns `{ ok: true, dev: true }` — the form still works, emails just won't send. Good for testing.
+- Unique `<title>` and `<meta description>` per page (updated dynamically)
+- Open Graph and Twitter Card tags
+- Schema.org `LodgingBusiness` structured data
+- `sitemap.xml` and `robots.txt`
+- Hero image `<link rel="preload">` for LCP
+- Responsive `srcSet` on all hero images
 
-## 📡 API Routes (Vercel Serverless Functions)
+## Booking Flow
 
-### `POST /api/enquiry`
-Handles the reservation enquiry form. Sends two emails:
-- **Inn notification** — formatted summary with guest details & dates
-- **Guest confirmation** — branded email with booking platform links
+The `BookingWidget` generates pre-filled deep-links to:
+- Booking.com
+- Expedia Canada
+- Hotels.com
+- KAYAK Canada
 
-**Body (JSON):**
-```json
-{
-  "name": "Jane Smith",
-  "email": "jane@example.com",
-  "phone": "250-555-0000",
-  "checkin": "2025-07-15",
-  "checkout": "2025-07-18",
-  "guests": "2",
-  "roomType": "Standard Room",
-  "channelPref": "Either",
-  "message": "We have a dog."
-}
-```
+Direct phone booking: +1 (250) 344-0047
 
-### `GET /api/availability?checkin=2025-07-15&checkout=2025-07-18&guests=2`
-Returns deep-link URLs to all booking platforms with dates pre-filled.
-Add `&platform=booking` to redirect directly to that platform.
+## Email
 
-**Why not a real OTA API?**
-Booking.com and Expedia Connectivity APIs require corporate partner approval
-(months of onboarding, PMS certification). For a single property, the correct 
-approach is a **channel manager** (SiteMinder, Little Hotelier, Cloudbeds ~$100/mo)
-which syncs availability across all OTAs and provides an embeddable booking engine.
-The `/api/availability` route generates pre-filled deep-links as the practical 
-zero-cost alternative.
+Contact form sends two emails via Resend:
+1. **To the inn** — guest details, dates, message, reply-to header
+2. **To the guest** — confirmation with a summary of their enquiry
 
-## 📁 Project Structure
-```
-api/
-  enquiry.js         # POST — email notification handler (Resend)
-  availability.js    # GET  — OTA deep-link generator with pre-filled dates
-src/
-  components/
-    BookingWidget.jsx  # Availability search → OTA platform links
-    Nav.jsx            # Responsive nav with hamburger
-    Footer.jsx         # Footer with travel site links
-    UI.jsx             # Shared: Btn, Head, MtnDivider, PageHero, Sec, Stars
-    PhotoSlider.jsx    # Auto-advancing image slider with lightbox
-    ReviewSlider.jsx   # Review carousel (TripAdvisor/Booking.com)
-    Gallery.jsx        # Photo gallery with lightbox
-  pages/
-    Home.jsx
-    Accommodations.jsx
-    Activities.jsx     # Includes Tourism Golden photo gallery
-    Location.jsx
-    Packages.jsx
-    Contact.jsx        # BookingWidget + enquiry form → /api/enquiry
-  data/
-    index.js           # All content — rooms, reviews, activities, links
-  App.jsx
-  main.jsx
-  index.css
-vercel.json            # SPA routing + API route passthrough
-```
+## Domain Setup (custom domain)
 
-## 🎨 Updating Content
-All site content lives in `src/data/index.js`:
-- `propertyPhotos` — swap in real property photos
-- `goldenImages` — Tourism Golden images (currently hotlinked)
-- `rooms` — room types, features, descriptions
-- `activities` — activities with optional images
-- `reviews` — curated guest reviews
-- `travelLinks` — OTA platform links with review counts
-
-## 📞 Property Info
-- Toll-free: 1-800-881-4233
-- Direct: 250-344-2205  
-- Address: 1206 Trans-Canada Hwy, Golden, BC V0A 1H1
-- Website: ponderosamotorinn.bc.ca
+1. Add your domain in Vercel dashboard → Settings → Domains
+2. Update DNS CNAME to Vercel's target
+3. Update `canonical` URL in `index.html`
+4. Update `sitemap.xml` URLs
+5. Update Resend sender addresses (`from:` in `api/enquiry.js`)
+6. Update structured data `url` in `index.html`

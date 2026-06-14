@@ -1,103 +1,43 @@
-/**
- * GET /api/img?url=<encoded-url>
- *
- * Server-side image proxy. Fetches external images with proper browser-like headers,
- * bypassing hotlink protection on TripAdvisor, Tourism Golden, etc.
- * Adds aggressive cache headers so images are cached at Vercel's edge.
- *
- * Security: only allows whitelisted domains to prevent abuse.
- */
-
-export const config = { runtime: 'edge' };
-
-// Only proxy images from these trusted domains
-const ALLOWED_HOSTS = [
+const ALLOWED_DOMAINS = [
   'dynamic-media-cdn.tripadvisor.com',
   'media-cdn.tripadvisor.com',
-  'www.tourismgolden.com',
-  'tourismgolden.com',
-  'goldenskybridge.com',
-  'www.goldenskybridge.com',
-  'upload.wikimedia.org',
-  'commons.wikimedia.org',
-  'images.unsplash.com',
-  'live.staticflickr.com',
-];
+  'www.tourismpg.com',
+  'www.tourism.golden.bc.ca',
+  'tourism.golden.bc.ca',
+]
 
-const FETCH_HEADERS = {
-  'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-  'Accept': 'image/avif,image/webp,image/apng,image/*,*/*;q=0.8',
-  'Accept-Language': 'en-US,en;q=0.9',
-  'Accept-Encoding': 'gzip, deflate, br',
-  'Referer': 'https://www.google.com/',
-  'sec-fetch-dest': 'image',
-  'sec-fetch-mode': 'no-cors',
-  'sec-fetch-site': 'cross-site',
-};
+export default async function handler(req, res) {
+  const { url } = req.query
+  if (!url) return res.status(400).json({ error: 'url parameter required' })
 
-export default async function handler(req) {
-  const { searchParams } = new URL(req.url);
-  const imageUrl = searchParams.get('url');
+  let parsed
+  try { parsed = new URL(url) } catch { return res.status(400).json({ error: 'Invalid URL' }) }
 
-  const errorResponse = (msg, status = 400) =>
-    new Response(JSON.stringify({ error: msg }), {
-      status,
-      headers: { 'Content-Type': 'application/json' },
-    });
-
-  if (!imageUrl) return errorResponse('Missing ?url= parameter');
-
-  let parsed;
-  try {
-    parsed = new URL(imageUrl);
-  } catch {
-    return errorResponse('Invalid URL');
-  }
-
-  // Security: only allow whitelisted hosts
-  if (!ALLOWED_HOSTS.some(h => parsed.hostname === h || parsed.hostname.endsWith('.' + h))) {
-    return errorResponse(`Host not allowed: ${parsed.hostname}`, 403);
-  }
-
-  // Security: only allow https
-  if (parsed.protocol !== 'https:') {
-    return errorResponse('Only HTTPS URLs allowed', 400);
+  if (!ALLOWED_DOMAINS.includes(parsed.hostname)) {
+    return res.status(403).json({ error: 'Domain not allowed' })
   }
 
   try {
-    const upstream = await fetch(imageUrl, {
-      headers: FETCH_HEADERS,
-      redirect: 'follow',
-    });
-
-    if (!upstream.ok) {
-      return errorResponse(`Upstream returned ${upstream.status}`, upstream.status);
-    }
-
-    const contentType = upstream.headers.get('content-type') || 'image/jpeg';
-
-    // Only allow actual image content types
-    if (!contentType.startsWith('image/')) {
-      return errorResponse('Upstream response is not an image', 400);
-    }
-
-    const body = await upstream.arrayBuffer();
-
-    return new Response(body, {
-      status: 200,
+    const upstream = await fetch(url, {
       headers: {
-        'Content-Type': contentType,
-        // Cache at edge for 7 days, browser for 1 day
-        'Cache-Control': 'public, s-maxage=604800, max-age=86400, stale-while-revalidate=86400',
-        'CDN-Cache-Control': 'public, max-age=604800',
-        'Vary': 'Accept',
-        // Security
-        'X-Content-Type-Options': 'nosniff',
-        'Access-Control-Allow-Origin': '*',
-      },
-    });
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+        'Accept': 'image/avif,image/webp,image/apng,image/*,*/*;q=0.8',
+        'Accept-Language': 'en-CA,en;q=0.9',
+        'Referer': parsed.origin + '/',
+        'Origin': parsed.origin,
+      }
+    })
+
+    if (!upstream.ok) return res.status(upstream.status).end()
+
+    const contentType = upstream.headers.get('content-type') || 'image/jpeg'
+    const buffer = await upstream.arrayBuffer()
+
+    res.setHeader('Content-Type', contentType)
+    res.setHeader('Cache-Control', 'public, max-age=86400, stale-while-revalidate=604800')
+    res.setHeader('X-Proxy-Domain', parsed.hostname)
+    return res.status(200).send(Buffer.from(buffer))
   } catch (err) {
-    console.error('Image proxy error:', err);
-    return errorResponse(`Proxy fetch failed: ${err.message}`, 502);
+    return res.status(502).json({ error: 'Upstream fetch failed' })
   }
 }

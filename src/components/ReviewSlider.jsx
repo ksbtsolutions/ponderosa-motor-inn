@@ -1,77 +1,90 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { Stars } from './UI.jsx';
+import React, { useState, useEffect, useRef } from 'react'
 
-const PLATFORM_COLORS = {
-  TripAdvisor: { bg: '#00aa6c', label: 'TRIPADVISOR' },
-  'Booking.com': { bg: '#003580', label: 'BOOKING.COM' },
-};
+const REVIEWS = [
+  { name: 'Sarah M.', location: 'Calgary, AB', rating: 5, text: 'Perfect base for our Kicking Horse ski trip. Rooms were spotless, beds incredibly comfortable, and the staff went above and beyond helping us plan our days. Unbeatable value in Golden.', date: 'February 2024' },
+  { name: 'James T.', location: 'Vancouver, BC', rating: 5, text: 'We stayed here on our way through to Banff and ended up extending our trip just to explore more of Golden. The proximity to the Skybridge and hiking was perfect. Will absolutely return.', date: 'July 2024' },
+  { name: 'Marie-Claire B.', location: 'Montréal, QC', rating: 4, text: 'Très bonne expérience. Clean, quiet rooms and friendly front desk. The free parking was a bonus when travelling with our bikes and gear. Great location near downtown Golden.', date: 'August 2024' },
+  { name: 'David & Karen L.', location: 'Seattle, WA', rating: 5, text: 'Third year staying here for our annual rafting trip on the Kicking Horse River. The inn has become like home — the owners remember us by name. Genuine hospitality is rare.', date: 'June 2024' },
+  { name: 'Tomás R.', location: 'Edmonton, AB', rating: 5, text: 'Stopped here during a cycling tour and could not have picked better. Staff helped arrange bike storage, gave local trail tips, and the beds were exactly what sore legs needed.', date: 'September 2024' },
+]
 
-function ReviewCard({ r }) {
-  const pc = PLATFORM_COLORS[r.platform] || { bg: '#555', label: r.platform.toUpperCase() };
+function Stars({ count }) {
   return (
-    <div style={{ background: '#fff', borderRadius: 4, padding: '1.6rem', border: '1px solid #e5dfd5', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', height: '100%' }}>
-      <div style={{ fontSize: '2rem', color: '#e8e2d8', lineHeight: 1, marginBottom: '0.4rem', fontFamily: 'Georgia,serif' }}>"</div>
-      <Stars n={r.stars} />
-      <p style={{ fontSize: '0.85rem', color: '#2E2E2E', lineHeight: 1.7, flex: 1, marginBottom: '1rem', fontStyle: 'italic' }}>"{r.text}"</p>
-      <div style={{ borderTop: '1px solid #f0ece6', paddingTop: '0.85rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '0.5rem' }}>
-          <div>
-            <div style={{ fontWeight: 600, color: '#1A2B1A', fontSize: '0.85rem' }}>{r.name}</div>
-            <div style={{ fontSize: '0.72rem', color: '#6B6456' }}>{r.date}</div>
-          </div>
-          <div style={{ background: pc.bg, color: '#fff', fontSize: '0.58rem', fontWeight: 700, padding: '0.2rem 0.5rem', borderRadius: 2, letterSpacing: '0.06em' }}>{pc.label}</div>
-        </div>
-        <div style={{ marginTop: '0.4rem', fontSize: '0.7rem', color: '#C4872A', fontWeight: 600 }}>✦ {r.highlight}</div>
-      </div>
+    <div className="stars" aria-label={`${count} out of 5 stars`}>
+      {Array.from({ length: 5 }).map((_, i) => (
+        <svg key={i} width="14" height="14" viewBox="0 0 24 24" fill={i < count ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.5">
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+        </svg>
+      ))}
     </div>
-  );
+  )
 }
 
-export default function ReviewSlider({ reviews }) {
-  const [page, setPage] = useState(0);
-  const [cols, setCols] = useState(3);
-  const timer = useRef(null);
+export function ReviewSlider() {
+  const [active, setActive] = useState(0)
+  const [paused, setPaused] = useState(false)
+  const timerRef = useRef(null)
 
   useEffect(() => {
-    const check = () => setCols(window.innerWidth < 600 ? 1 : window.innerWidth < 900 ? 2 : 3);
-    check();
-    window.addEventListener('resize', check);
-    return () => window.removeEventListener('resize', check);
-  }, []);
+    if (paused) return
+    timerRef.current = setInterval(() => setActive(a => (a + 1) % REVIEWS.length), 5500)
+    return () => clearInterval(timerRef.current)
+  }, [paused])
 
-  const total = Math.ceil(reviews.length / cols);
-  const go = useCallback((n) => setPage(p => (p + n + total) % total), [total]);
-
-  const startTimer = useCallback(() => {
-    clearInterval(timer.current);
-    timer.current = setInterval(() => go(1), 6000);
-  }, [go]);
-
-  useEffect(() => { startTimer(); return () => clearInterval(timer.current); }, [startTimer]);
-
-  const visible = reviews.slice(page * cols, page * cols + cols);
+  const go = (i) => { setActive(i); setPaused(true) }
 
   return (
-    <div onMouseEnter={() => clearInterval(timer.current)} onMouseLeave={startTimer}>
-      <div style={{ display: 'grid', gridTemplateColumns: `repeat(${cols}, 1fr)`, gap: '1.25rem', minHeight: 240 }}>
-        {visible.map((r, i) => <ReviewCard key={i} r={r} />)}
+    <div style={{ maxWidth: 720, margin: '0 auto' }}
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+    >
+      <div style={{ position: 'relative', minHeight: 200 }}>
+        {REVIEWS.map((r, i) => (
+          <div key={i} style={{
+            position: i === 0 ? 'relative' : 'absolute',
+            top: 0, left: 0, width: '100%',
+            opacity: active === i ? 1 : 0,
+            transform: active === i ? 'translateY(0)' : 'translateY(8px)',
+            transition: 'opacity 400ms ease, transform 400ms ease',
+            pointerEvents: active === i ? 'auto' : 'none',
+          }}>
+            <blockquote style={{ textAlign: 'center' }}>
+              <Stars count={r.rating} />
+              <p style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.1rem, 3vw, 1.35rem)', fontStyle: 'italic', lineHeight: 1.7, color: 'var(--forest)', margin: '1.25rem 0', padding: '0 1rem' }}>
+                "{r.text}"
+              </p>
+              <footer style={{ fontSize: '0.875rem' }}>
+                <strong style={{ color: 'var(--forest)' }}>{r.name}</strong>
+                <span style={{ color: 'var(--text-muted)', marginLeft: '0.5rem' }}>· {r.location}</span>
+                <span style={{ color: 'var(--stone-lite)', marginLeft: '0.5rem', fontSize: '0.8rem' }}>· {r.date}</span>
+              </footer>
+            </blockquote>
+          </div>
+        ))}
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem', marginTop: '1.75rem' }}>
-        <button onClick={() => { go(-1); startTimer(); }}
-          style={{ background: 'none', border: '1px solid #C4872A', color: '#C4872A', width: 36, height: 36, borderRadius: '50%', cursor: 'pointer', fontSize: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>‹</button>
-        <div style={{ display: 'flex', gap: 6 }}>
-          {Array.from({ length: total }).map((_, i) => (
-            <button key={i} onClick={() => { setPage(i); startTimer(); }}
-              style={{ width: i === page ? 20 : 8, height: 8, borderRadius: 4, border: 'none', background: i === page ? '#C4872A' : '#d5cfc4', cursor: 'pointer', transition: 'all 0.3s', padding: 0 }} />
-          ))}
-        </div>
-        <button onClick={() => { go(1); startTimer(); }}
-          style={{ background: 'none', border: '1px solid #C4872A', color: '#C4872A', width: 36, height: 36, borderRadius: '50%', cursor: 'pointer', fontSize: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>›</button>
+      {/* Dots */}
+      <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', marginTop: '2rem' }} role="tablist" aria-label="Review navigation">
+        {REVIEWS.map((_, i) => (
+          <button
+            key={i}
+            role="tab"
+            aria-selected={active === i}
+            aria-label={`Review ${i + 1}`}
+            onClick={() => go(i)}
+            style={{
+              width: active === i ? 24 : 8,
+              height: 8,
+              borderRadius: 4,
+              background: active === i ? 'var(--amber)' : 'var(--parchment-d)',
+              border: 'none',
+              cursor: 'pointer',
+              transition: 'width 300ms, background 300ms',
+              padding: 0,
+            }}
+          />
+        ))}
       </div>
-      <p style={{ textAlign: 'center', fontSize: '0.7rem', color: '#6B6456', marginTop: '1rem' }}>
-        Reviews sourced from TripAdvisor and Booking.com
-      </p>
     </div>
-  );
+  )
 }

@@ -1,104 +1,92 @@
-import { proxyUrl } from '../components/scenes.js';
-import { Link } from 'react-router-dom';
-import { PageHero, Sec, Head, Btn } from '../components/UI.jsx';
-import Gallery from '../components/Gallery.jsx';
-import { activities, goldenImages } from '../data/index.js';
+import React from 'react'
+import { HeroMedia } from '../components/HeroMedia'
+import { AnimateIn } from '../components/AnimateIn'
+
+const SEASONS = ['All', 'Winter', 'Summer', 'Year Round']
+
+const ACTIVITIES = [
+  { season: 'Winter', title: 'Kicking Horse Mountain Resort', emoji: '⛷️', distance: '20 min', desc: 'One of Canada\'s premier ski destinations with 4 alpine bowls, 1,200m vertical drop, and legendary powder. World-class terrain for all ability levels.', url: 'https://www.kickinghorseresort.com' },
+  { season: 'Summer', title: 'Golden Skybridge', emoji: '🌉', distance: '12 min', desc: 'Two suspension bridges spanning a dramatic river canyon — Canada\'s highest. Includes an adventure course, zipline, and gold panning. A must-see for all ages.', url: 'https://www.goldenskybridge.ca' },
+  { season: 'Year Round', title: 'Glacier National Park', emoji: '🏔️', distance: '65 km east', desc: 'Over 400 glaciers, iconic Rogers Pass, and dramatic alpine terrain. Spectacular in all seasons — golden larch in fall, wildflowers in summer, backcountry skiing in winter.', url: 'https://parks.canada.ca/pn-np/bc/glacier' },
+  { season: 'Summer', title: 'Kicking Horse River Rafting', emoji: '🚣', distance: '10 min', desc: 'Some of the best whitewater in BC, with options from mild family floats to Class IV rapids. Multiple outfitters operate right in Golden.', url: 'https://www.goldenbc.ca' },
+  { season: 'Year Round', title: 'Columbia River Wetlands', emoji: '🦅', distance: '5 min', desc: 'The largest intact inland wetland in western North America. Home to over 260 bird species including osprey, great blue heron, and bald eagles. Canoe and kayak rentals available.', url: null },
+  { season: 'Summer', title: 'Mountain Biking', emoji: '🚵', distance: 'Trailhead: 8 min', desc: 'Golden\'s trail network is world-class, with everything from gentle riverside paths to gnarly enduro descents. The Moonraker trail system is a local favourite.', url: 'https://www.goldenbc.ca/adventures/mountain-biking/' },
+  { season: 'Summer', title: 'Emerald Lake', emoji: '🏊', distance: '80 km south', desc: 'The iconic jewel of Yoho National Park — strikingly turquoise water surrounded by peaks. Ideal for canoe rental, easy hiking, and photography.', url: 'https://parks.canada.ca/pn-np/bc/yoho' },
+  { season: 'Year Round', title: 'Town of Golden', emoji: '🏘️', distance: '0 min', desc: 'Downtown Golden punches above its weight with excellent restaurants, craft breweries, local art galleries, and a vibrant outdoor-focused community. Walk from the inn.', url: 'https://www.goldenbc.ca' },
+]
 
 export default function Activities() {
+  const [filter, setFilter] = React.useState('All')
+  const filtered = filter === 'All' ? ACTIVITIES : ACTIVITIES.filter(a => a.season === filter)
+
   return (
-    <div>
-      <PageHero eyebrow="Activities" title="Adventure at Every Season"
-        subtitle="Golden isn't just a stopover — it's a destination. World-class ski, bike, hike, raft, and more, all within minutes of your room."/>
-
-      <Sec bg="#F5F0E8">
-        <div className="activity-grid">
-          {activities.map((a,i) => (
-            <div key={i} style={{ background:'#fff', borderRadius:4, border:'1px solid #e5dfd5', borderLeft:'3px solid #C4872A', overflow:'hidden' }}>
-              {a.img && (
-                <div style={{ height:160, overflow:'hidden', position:'relative' }}>
-                  <img src={proxyUrl(a.img)} alt={a.name} style={{ width:'100%', height:'100%', objectFit:'cover' }} onError={e=>{ if(a.fallback && e.target.src!==a.fallback) e.target.src=a.fallback; }} loading="lazy"/>
-                  <div style={{ position:'absolute', top:'0.6rem', right:'0.6rem', background:'rgba(0,0,0,0.55)', color:'#E5A83E', fontSize:'0.6rem', fontWeight:600, textTransform:'uppercase', letterSpacing:'0.1em', padding:'0.2rem 0.5rem', borderRadius:2 }}>{a.season}</div>
-                </div>
-              )}
-              <div style={{ padding:'1.25rem', display:'flex', gap:'0.9rem', alignItems:'flex-start' }}>
-                <span style={{ fontSize:'1.6rem', flexShrink:0 }}>{a.icon}</span>
-                <div>
-                  {!a.img && <div style={{ display:'flex', alignItems:'center', gap:'0.6rem', flexWrap:'wrap', marginBottom:'0.3rem' }}>
-                    <div style={{ fontSize:'0.68rem', color:'#C4872A', textTransform:'uppercase', letterSpacing:'0.1em', fontWeight:600 }}>{a.season}</div>
-                  </div>}
-                  <div style={{ fontFamily:"'Playfair Display',serif", fontSize:'1.05rem', color:'#1A2B1A', marginBottom:'0.35rem' }}>{a.name}</div>
-                  <p style={{ fontSize:'0.82rem', color:'#6B6456', lineHeight:1.65 }}>{a.desc}</p>
-                  {a.link && <a href={a.link} target="_blank" rel="noopener noreferrer" style={{ fontSize:'0.75rem', color:'#C4872A', fontWeight:600, textDecoration:'none', display:'inline-block', marginTop:'0.6rem' }}>Official website →</a>}
-                </div>
-              </div>
-            </div>
-          ))}
+    <main>
+      <HeroMedia
+        imgSrc="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1080&q=85"
+        alt="Mountain activities near Golden BC"
+        minHeight="50vh"
+      >
+        <div className="container" style={{ paddingTop: '7rem', paddingBottom: '3rem' }}>
+          <span className="eyebrow">Things To Do</span>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2.25rem, 6vw, 4rem)', fontWeight: 700, color: '#fff', lineHeight: 1.1, marginTop: '0.75rem' }}>
+            Golden's backyard<br /><em>is extraordinary</em>
+          </h1>
+          <p style={{ color: 'rgba(255,255,255,0.8)', marginTop: '1rem', maxWidth: '46ch', fontSize: '1.0625rem', lineHeight: 1.7 }}>
+            Six national parks within a two-hour drive. World-class skiing, rafting, biking, and wildlife, right outside our door.
+          </p>
         </div>
-      </Sec>
+      </HeroMedia>
 
-      {/* GOLDEN PHOTO GALLERY */}
-      <Sec bg="#1A2B1A">
-        <Head light eyebrow="Golden, BC" title="See It for Yourself" body="Photos from around Golden and the surrounding national parks. Click any image to enlarge."/>
-        <Gallery images={goldenImages}/>
-        <p style={{ textAlign:'center', marginTop:'1.5rem', fontSize:'0.72rem', color:'#5a6a4a' }}>
-          Photos courtesy of Tourism Golden · <a href="https://www.tourismgolden.com" target="_blank" rel="noopener noreferrer" style={{ color:'#E5A83E', textDecoration:'none' }}>tourismgolden.com</a>
-        </p>
-      </Sec>
-
-      {/* SKI FEATURE */}
-      <Sec bg="#F5F0E8">
-        <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))', gap:'3rem', alignItems:'center' }}>
-          <div>
-            <p style={{ fontSize:'0.7rem', letterSpacing:'0.18em', textTransform:'uppercase', color:'#C4872A', fontWeight:600, marginBottom:'0.55rem' }}>Featured Attraction</p>
-            <h2 style={{ fontFamily:"'Playfair Display',serif", fontSize:'clamp(1.7rem,4vw,2.4rem)', color:'#1A2B1A', lineHeight:1.2, marginBottom:'1rem' }}>Kicking Horse Mountain Resort</h2>
-            <p style={{ color:'#6B6456', fontSize:'0.92rem', lineHeight:1.75, marginBottom:'1.5rem' }}>One of Canada's premier ski destinations sits 5 minutes from our front door. Over 2,800m of vertical — the fourth largest in Canada — and legendary champagne powder. In summer, the mountain offers biking, gondola rides, and visits to Boo the grizzly bear.</p>
-            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'0.7rem', marginBottom:'1.75rem' }}>
-              {[['2,800m','Vertical Drop'],['120+','Marked Runs'],['4','Alpine Bowls'],['5 min','From Ponderosa']].map(([n,l],i)=>(
-                <div key={i} style={{ background:'#fff', padding:'0.9rem', borderRadius:3, border:'1px solid #e5dfd5' }}>
-                  <div style={{ fontFamily:"'Playfair Display',serif", fontSize:'1.4rem', color:'#C4872A' }}>{n}</div>
-                  <div style={{ fontSize:'0.65rem', color:'#6B6456', textTransform:'uppercase', letterSpacing:'0.1em', marginTop:'0.15rem' }}>{l}</div>
-                </div>
+      <section className="section" style={{ background: 'var(--parchment)' }}>
+        <div className="container">
+          <AnimateIn>
+            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '3rem', flexWrap: 'wrap' }}>
+              {SEASONS.map(s => (
+                <button
+                  key={s}
+                  onClick={() => setFilter(s)}
+                  className={`btn ${filter === s ? 'btn-primary' : 'btn-secondary'} btn-sm`}
+                >
+                  {s}
+                </button>
               ))}
             </div>
-            <div style={{ display:'flex', gap:'1rem', flexWrap:'wrap' }}>
-              <Btn href="https://www.kickinghorseresort.com" target="_blank" rel="noopener noreferrer">Resort Website</Btn>
-              <Btn variant="outline" href="/packages">See Ski Package</Btn>
-            </div>
-          </div>
-          <div style={{ borderRadius:4, overflow:'hidden', aspectRatio:'4/3' }}>
-            <img src={proxyUrl("https://www.tourismgolden.com/sites/default/files/styles/hero_image/public/2022-11/Kicking-Horse-Mountain-Resort-ski-Golden-BC-winter.jpg")}
-              alt="Kicking Horse Mountain Resort" style={{ width:'100%', height:'100%', objectFit:'cover' }}
-              onError={e=>e.target.parentNode.style.background='#1A2B1A'} loading="lazy"/>
-          </div>
-        </div>
-      </Sec>
+          </AnimateIn>
 
-      {/* SKYBRIDGE FEATURE */}
-      <Sec bg="#fff">
-        <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))', gap:'3rem', alignItems:'center' }}>
-          <div style={{ borderRadius:4, overflow:'hidden', aspectRatio:'4/3' }}>
-            <img src={proxyUrl("https://www.tourismgolden.com/sites/default/files/styles/hero_image/public/2024-02/Golden-Skybridge-suspension-bridge-canyon-BC.jpg")}
-              alt="Golden Skybridge" style={{ width:'100%', height:'100%', objectFit:'cover' }}
-              onError={e=>e.target.parentNode.style.background='#1A2B1A'} loading="lazy"/>
+          <div className="grid-2" style={{ gap: '1.5rem' }}>
+            {filtered.map((a, i) => (
+              <AnimateIn key={a.title} delay={i % 2 + 1}>
+                <div style={{ display: 'flex', gap: '1.25rem', padding: '1.75rem', background: 'var(--cream)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-sm)', height: '100%' }}>
+                  <div style={{ fontSize: '2.5rem', flexShrink: 0 }}>{a.emoji}</div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                      <span className="badge badge-amber">{a.season}</span>
+                      <span style={{ fontSize: '0.75rem', color: 'var(--text-light)' }}>📍 {a.distance}</span>
+                    </div>
+                    <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.125rem', fontWeight: 700, color: 'var(--forest)', marginBottom: '0.5rem' }}>{a.title}</h3>
+                    <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', lineHeight: 1.7, marginBottom: '0.875rem' }}>{a.desc}</p>
+                    {a.url && (
+                      <a href={a.url} target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.8rem', color: 'var(--amber-dark)', fontWeight: 600, textDecoration: 'underline', textUnderlineOffset: 3 }}>
+                        Learn more →
+                      </a>
+                    )}
+                  </div>
+                </div>
+              </AnimateIn>
+            ))}
           </div>
-          <div>
-            <p style={{ fontSize:'0.7rem', letterSpacing:'0.18em', textTransform:'uppercase', color:'#C4872A', fontWeight:600, marginBottom:'0.55rem' }}>Must-See Attraction</p>
-            <h2 style={{ fontFamily:"'Playfair Display',serif", fontSize:'clamp(1.7rem,4vw,2.4rem)', color:'#1A2B1A', lineHeight:1.2, marginBottom:'1rem' }}>Golden Skybridge</h2>
-            <p style={{ color:'#6B6456', fontSize:'0.92rem', lineHeight:1.75, marginBottom:'1.5rem' }}>Canada's highest suspension bridges — walk 426 feet above Hospital Creek canyon with sweeping views of the Rocky and Purcell mountain ranges. Plus zipline, mountain coaster, canyon swing, and axe throwing. Just 2 minutes from Highway 1.</p>
-            <div style={{ display:'flex', gap:'1rem', flexWrap:'wrap' }}>
-              <Btn href="https://goldenskybridge.com" target="_blank" rel="noopener noreferrer">Book Tickets</Btn>
-            </div>
-          </div>
-        </div>
-      </Sec>
 
-      <Sec bg="#F5F0E8" py="4rem" style={{ textAlign:'center' }}>
-        <Head eyebrow="Plan Your Trip" title="We Know Golden" body="Call us and we'll help plan your days — trail recommendations to booking tips. It's part of the stay." center/>
-        <div style={{ display:'flex', gap:'1rem', justifyContent:'center', flexWrap:'wrap' }}>
-          <Btn href="tel:18008814233">Call 1-800-881-4233</Btn>
-          <Btn variant="outline" href="/packages">View Packages</Btn>
+          <AnimateIn>
+            <div style={{ marginTop: '3rem', padding: '2rem', background: 'var(--forest)', borderRadius: 'var(--radius-xl)', color: '#fff', textAlign: 'center' }}>
+              <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.75rem' }}>Need local tips?</h3>
+              <p style={{ color: 'rgba(255,255,255,0.75)', marginBottom: '1.5rem', maxWidth: '48ch', margin: '0 auto 1.5rem' }}>
+                Our front desk team skis, bikes, and hikes in this valley year-round. Ask us anything — current trail conditions, where to rent gear, the best spot for breakfast before a ski day.
+              </p>
+              <a href="tel:+12503440047" className="btn btn-primary">Call +1 (250) 344-0047</a>
+            </div>
+          </AnimateIn>
         </div>
-      </Sec>
-    </div>
-  );
+      </section>
+    </main>
+  )
 }

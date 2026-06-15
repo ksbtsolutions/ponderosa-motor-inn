@@ -1,7 +1,10 @@
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { Routes, Route, useLocation } from 'react-router-dom'
 import { Nav } from './components/Nav'
 import { Footer } from './components/Footer'
+import { SeasonParticles } from './components/SeasonParticles'
+import { WanderingBear, PeekingGoat, KonamiMoose, FootprintTrail, SeasonBadge } from './components/EasterEggs'
+import { getSeason, applySeasonTheme } from './hooks/useSeason'
 import Home from './pages/Home'
 import Accommodations from './pages/Accommodations'
 import Activities from './pages/Activities'
@@ -41,18 +44,13 @@ function PageWrapper({ children }) {
   const ref = useRef(null)
 
   useEffect(() => {
-    // Scroll to top on route change
     window.scrollTo({ top: 0, behavior: 'instant' })
-
-    // Update meta per page
     const meta = PAGE_META[location.pathname]
     if (meta) {
       document.title = meta.title
       let desc = document.querySelector('meta[name="description"]')
       if (desc) desc.setAttribute('content', meta.description)
     }
-
-    // Fade in transition
     const el = ref.current
     if (!el) return
     el.style.opacity = '0'
@@ -68,6 +66,13 @@ function PageWrapper({ children }) {
 }
 
 export default function App() {
+  const [season, setSeason] = useState(() => getSeason())
+
+  // Apply theme on mount and when season changes
+  useEffect(() => {
+    applySeasonTheme(season)
+  }, [season])
+
   return (
     <>
       <a href="#main-content" style={{ position: 'absolute', left: -9999, top: 0, zIndex: 9999, padding: '0.5rem 1rem', background: 'var(--amber)', color: '#fff', fontWeight: 600 }}
@@ -76,6 +81,18 @@ export default function App() {
       >
         Skip to main content
       </a>
+
+      {/* Season particles layer */}
+      <SeasonParticles season={season} />
+
+      {/* Easter eggs */}
+      <WanderingBear />
+      <PeekingGoat />
+      <KonamiMoose />
+      <FootprintTrail />
+
+      {/* Season switcher badge */}
+      <SeasonBadge season={season} onSeasonChange={setSeason} />
 
       <Nav />
 
